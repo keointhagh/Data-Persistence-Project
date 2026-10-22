@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem; // MIGRATED: New Input System namespace
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.InputSystem; // MIGRATED: New Input System namespace
 
 public class MainManager : MonoBehaviour
 {
@@ -12,7 +13,10 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text ScoreNameText;
+    public Text playerNameText;
     public GameObject GameOverText;
+    public GameObject gameOverButtons;
 
     private bool m_Started = false;
     private int m_Points;
@@ -41,8 +45,9 @@ public class MainManager : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    public void Start()
     {
+        gameOverButtons.SetActive(false);
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
 
@@ -57,6 +62,12 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        //string pName = "";
+        //if (PersistManager.persistManager.playerName == null || PersistManager.persistManager.playerName.Length == 0) pName = "Bob";
+        playerNameText.text = PersistManager.persistManager.playerName;
+        ScoreNameText.text = "Best Score : " + PersistManager.persistManager.topScorerName + " : " + PersistManager.persistManager.playerScore;
+
+
     }
 
     private void Update()
@@ -76,6 +87,7 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
+            gameOverButtons.SetActive(true);
             if (m_LaunchAction.WasPressedThisFrame()) // MIGRATED: was Input.GetKeyDown(KeyCode.Space)
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -93,5 +105,27 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if (m_Points > PersistManager.persistManager.playerScore)
+        {
+            PersistManager.persistManager.playerScore = m_Points;
+            PersistManager.persistManager.topScorerName = PersistManager.persistManager.playerName;
+            ScoreNameText.text = "Best Score : " + PersistManager.persistManager.topScorerName + " : " + PersistManager.persistManager.playerScore;
+            PersistManager.persistManager.SaveScore();
+        }
+    }
+    public void ReturnToMenu()
+    {
+        SceneManager.LoadScene(1);
+    }
+    public void Exit()
+    {
+        PersistManager.persistManager.SaveScore();
+
+#if UNITY_EDITOR
+        //Don't forget since this use editor code, need to add "using UnityEditor" at the top and wrap it between #if
+        EditorApplication.ExitPlaymode();
+#else
+        Application.Quit();
+#endif
     }
 }
