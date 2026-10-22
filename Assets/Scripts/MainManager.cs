@@ -115,7 +115,7 @@ public class MainManager : MonoBehaviour
     }
     public void ReturnToMenu()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(0);
     }
     public void Exit()
     {

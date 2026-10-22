@@ -25,7 +25,7 @@ public class MenuManager : MonoBehaviour
     public void StartGame()
     {
         //Debug.Log("Game is starting");
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(1);
     }
 
     public void InputNameField()
